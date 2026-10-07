@@ -5,6 +5,16 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+   images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ik.imagekit.io',
+ 
+        pathname: '/muhammadsakib/**',
+      },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {
@@ -16,3 +26,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// https://ik.imagekit.io/muhammadsakib/cart.png?updatedAt=1791385677073
