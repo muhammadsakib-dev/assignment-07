@@ -1,15 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import TodayDate from "./TodayDate";
 
 const Header = () => {
-  // Today's date in Bangla format
-  const today = new Date().toLocaleDateString("bn-BD", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZone: "Asia/Dhaka",
-  });
+
 
   // Authentication state
   // Fake state for now, will be replaced with actual auth logic
@@ -31,7 +25,9 @@ const Header = () => {
           <div>
             <h3 className="text-xl font-bold">বাজার দর</h3>
 
-            <p className="text-sm text-gray-500">{today}</p>
+            <p className="text-sm text-gray-500">
+              <TodayDate />
+            </p>
           </div>
         </Link>
       </div>

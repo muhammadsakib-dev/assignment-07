@@ -1,0 +1,28 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+const TodayDate = () => {
+  const [today, setToday] = useState("");
+
+  useEffect(() => {
+    const formattedDate = new Date().toLocaleDateString("bn-BD", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "Asia/Dhaka",
+    });
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setToday(formattedDate);
+  }, []);
+
+  return (
+    <p className="text-sm text-gray-500">
+      {today || "তারিখ লোড হচ্ছে..."}
+    </p>
+  );
+};
+
+export default TodayDate;
