@@ -22,13 +22,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${notoSerifBengali.className} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <nav>
+        <nav className="bg-white">
           <Header />
           <Navbar />
           <Marquee />
         </nav>
-        <div>{children}</div>
-        <footer>
+        <div className="grow bg-base-300">
+          {children}
+        </div>
+        <footer className="bg-white">
           <Footer />
         </footer>
       </body>
