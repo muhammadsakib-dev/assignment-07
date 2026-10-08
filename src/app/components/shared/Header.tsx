@@ -1,13 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import TodayDate from "./TodayDate";
+import TodayDate from "./headerItems/TodayDate";
+import AuthLinks from "./headerItems/AuthLinks";
+import UserMenu from "./headerItems/UserMenu";
 
 const Header = () => {
-
-
   // Authentication state
   // Fake state for now, will be replaced with actual auth logic
-  const isSignIn = false; // Change this to false to test the unauthenticated state
+  const isSignIn = true; // Change this to false to test the unauthenticated state
 
   return (
     <div className="navbar px-4 py-4  md:px-8 lg:px-32 border-b border-gray-300">
@@ -25,9 +25,9 @@ const Header = () => {
           <div>
             <h3 className="text-xl font-bold">বাজার দর</h3>
 
-            <p className="text-sm text-gray-500">
+            <time className="text-sm text-gray-500">
               <TodayDate />
-            </p>
+            </time>
           </div>
         </Link>
       </div>
@@ -56,41 +56,7 @@ const Header = () => {
             tabIndex={-1}
             className="menu menu-sm dropdown-content z-10 mt-8 w-72 rounded-box bg-base-200 p-3 shadow "
           >
-            {isSignIn ? (
-              <>
-                <li>
-                  <Link href="/profile" className="justify-between text-[1rem]">
-                    muhammadsakib079@gmail.com
-                  </Link>
-                </li>
-
-                <li>
-                  <Link className="text-[1rem]" href="/settings">
-                    Settings
-                  </Link>
-                </li>
-
-                <li>
-                  <Link className="text-[1rem]   text-red-500" href="/logout">
-                    Logout
-                  </Link>
-                </li>
-              </>
-            ) : (
-              <>
-                <li>
-                  <Link className="text-[1rem]" href="/sign-in">
-                    সাইন ইন
-                  </Link>
-                </li>
-
-                <li className="bg-green-700 text-white rounded-md hover:bg-green-800">
-                  <Link className="text-[1rem]" href="/sign-up">
-                    সাইন আপ
-                  </Link>
-                </li>
-              </>
-            )}
+            {isSignIn ? <UserMenu /> : <AuthLinks />}
           </ul>
         </div>
       </div>
@@ -123,39 +89,16 @@ const Header = () => {
                 tabIndex={-1}
                 className="menu menu-sm dropdown-content z-10 mt-8 w-90 rounded-box bg-base-100 p-2 shadow"
               >
-                <li>
-                  <Link href="" className="justify-between text-xl">
-                    muhammadsakib079@gmail.com
-                  </Link>
-                </li>
-
-                <li>
-                  <Link className="text-xl" href="/settings">
-                    Settings
-                  </Link>
-                </li>
-
-                <li>
-                  <Link className="text-xl  text-red-500" href="/logout">
-                    Logout
-                  </Link>
-                </li>
+                <UserMenu />
               </ul>
             </div>
           </div>
         ) : (
-          <div className="flex gap-4">
-            <Link href="/sign-in" className="btn btn-ghost">
-              সাইন ইন
-            </Link>
-
-            <Link
-              href="/sign-up"
-              className="btn bg-green-700 text-white hover:bg-green-800"
-            >
-              সাইন আপ
-            </Link>
-          </div>
+          <>
+            <ul className="menu menu-horizontal gap-4">
+              <AuthLinks />
+            </ul>
+          </>
         )}
       </div>
     </div>
