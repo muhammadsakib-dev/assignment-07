@@ -65,7 +65,7 @@ The application follows the Next.js App Router structure. Pages, layouts, compon
 
 Add the environment variables required by your application to `.env.local`, such as your MongoDB connection string, Better Auth secret, and application base URL.
 
-Keep your environment files and secrets private. Never commit credentials to GitHub.
+Keep your environment files and secrets private. Never commit credentials to GitHub
 
 ## Deployment
 
