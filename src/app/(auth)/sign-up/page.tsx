@@ -1,6 +1,9 @@
+
 "use client";
+
 import { Eye, EyeSlash } from "@gravity-ui/icons";
 import { authClient } from "@/app/lib/auth-client";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Button,
@@ -10,40 +13,128 @@ import {
   Label,
   TextField,
 } from "@heroui/react";
-import { FormEvent, useState } from "react";
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import { Social } from "@/app/components/authSharedCompomenrts/SocialSignIn";
 
+const getProductCallbackUrl = (callbackUrl: string | null) => {
+  if (!callbackUrl) return "/";
+
+  try {
+    const url = new URL(callbackUrl, window.location.origin);
+
+    if (
+      url.origin === window.location.origin &&
+      url.pathname.startsWith("/products/") &&
+      !url.pathname.includes("\\")
+    ) {
+      return `${url.pathname}${url.search}${url.hash}`;
+    }
+  } catch {
+    return "/";
+  }
+
+  return "/";
+};
+
 export default function SignUp() {
+  const router = useRouter();
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [callbackQuery, setCallbackQuery] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const callbackUrl = getProductCallbackUrl(
+      params.get("callbackUrl")
+    );
+
+    if (callbackUrl !== "/") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCallbackQuery(
+        `?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      );
+    }
+  }, []);
+
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setMessage("");
 
     const formData = new FormData(e.currentTarget);
 
-    const data = Object.fromEntries(
-      Array.from(formData.entries()).map(([key, value]) => [
-        key,
-        String(value),
-      ]),
-    ) as Record<string, string>;
+    const name = String(formData.get("name") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim();
 
-    const { data: signUpData, error } = await authClient.signUp.email({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    });
-    console.log("signUpData", signUpData);
+    if (!name || !email || !password || !confirmPassword) {
+      setMessage("সব তথ্য পূরণ করুন।");
+      return;
+    }
+
+    if (name.length < 3) {
+      setMessage("নাম কমপক্ষে ৩ অক্ষরের হতে হবে।");
+      return;
+    }
+
+    if (password.length < 8) {
+      setMessage("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।");
+      return;
+    }
+
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      setMessage(
+        "পাসওয়ার্ডে অন্তত একটি বড় হাতের ইংরেজি অক্ষর ও একটি সংখ্যা থাকতে হবে।"
+      );
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setMessage("দুটি পাসওয়ার্ড মিলছে না।");
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const destination = getProductCallbackUrl(
+      params.get("callbackUrl")
+    );
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await authClient.signUp.email({
+        name,
+        email,
+        password,
+        callbackURL: destination,
+      });
+
+      if (error) {
+        setMessage(
+          error.message || "অ্যাকাউন্ট তৈরি করা যায়নি।"
+        );
+        return;
+      }
+
+      router.replace(destination);
+      router.refresh();
+    } catch {
+      setMessage("সাইন আপ করার সময় সমস্যা হয়েছে।");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
 
   const passwordShowOrHide = (
     <Button
       type="button"
       isIconOnly
-      onClick={() => setShowPassword(!showPassword)}
-      className="min-w-8 text-gray-500 bg-white"
+      onPress={() => setShowPassword((previous) => !previous)}
+      className="min-w-8 bg-white text-gray-500"
+      aria-label={showPassword ? "Hide password" : "Show password"}
     >
       {showPassword ? <EyeSlash /> : <Eye />}
     </Button>
@@ -67,7 +158,7 @@ export default function SignUp() {
           isRequired
           name="name"
           validate={(value) => {
-            if (value.length < 3) {
+            if (value.trim().length < 3) {
               return "Name must be at least 3 characters";
             }
 
@@ -84,7 +175,9 @@ export default function SignUp() {
           name="email"
           type="email"
           validate={(value) => {
-            if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
+            if (
+              !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)
+            ) {
               return "Please enter a valid email address";
             }
 
@@ -96,23 +189,21 @@ export default function SignUp() {
           <FieldError />
         </TextField>
 
-        {/* Password */}
         <TextField
           isRequired
-          minLength={8}
           name="password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           validate={(value) => {
             if (value.length < 8) {
               return "Password must be at least 8 characters";
             }
 
             if (!/[A-Z]/.test(value)) {
-              return "Password must contain at least one uppercase letter";
+              return "Password must contain an uppercase letter";
             }
 
             if (!/[0-9]/.test(value)) {
-              return "Password must contain at least one number";
+              return "Password must contain a number";
             }
 
             return null;
@@ -137,7 +228,6 @@ export default function SignUp() {
           <FieldError />
         </TextField>
 
-        {/* Confirm Password */}
         <TextField
           isRequired
           name="confirmPassword"
@@ -165,31 +255,37 @@ export default function SignUp() {
           <FieldError />
         </TextField>
 
-        {/* Submit */}
+        {message && (
+          <p className="text-sm text-red-600" role="alert">
+            {message}
+          </p>
+        )}
+
         <div className="flex justify-center gap-2">
           <Button
             type="submit"
+            isDisabled={isSubmitting}
             className="mt-3 w-full rounded-lg bg-green-700 py-5 shadow-lg shadow-green-300"
           >
-            অ্যাকাউন্ট তৈরি করুন
+            {isSubmitting
+              ? "অ্যাকাউন্ট তৈরি হচ্ছে..."
+              : "অ্যাকাউন্ট তৈরি করুন"}
           </Button>
         </div>
       </Form>
 
-      {/* Social Login */}
       <div className="divider mx-auto max-w-96">অথবা</div>
 
       <div className="flex items-center justify-center gap-3">
         <Social />
       </div>
 
-      {/* Sign In */}
       <div className="mt-5 flex items-center justify-center gap-2">
         <h4>
           অ্যাকাউন্ট আছে?{" "}
           <Link
             className="font-medium text-green-700 hover:underline"
-            href="/sign-in"
+            href={`/sign-in${callbackQuery}`}
           >
             সাইন ইন করুন
           </Link>
