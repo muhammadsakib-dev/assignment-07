@@ -1,14 +1,20 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import TodayDate from "./headerItems/TodayDate";
+
+import { authClient } from "@/app/lib/auth-client";
 import AuthLinks from "./headerItems/AuthLinks";
+
+import TodayDate from "./headerItems/TodayDate";
 import UserMenu from "./headerItems/UserMenu";
 
-const Header = () => {
-  // Authentication state
-  // Fake state for now, will be replaced with actual auth logic
-  const isSignIn = true; // Change this to false to test the unauthenticated state
 
+const Header = () => {
+
+  const { data: session, isPending } = authClient.useSession();
+
+ const isSignIn = Boolean(session);
   return (
     <div className="navbar px-4 py-4  md:px-8 lg:px-32 border-b border-gray-300">
       {/* Logo */}
@@ -23,7 +29,7 @@ const Header = () => {
           />
 
           <div>
-            <h3 className="text-xl font-bold">বাজার দর</h3>
+            <h3 className="text-xl font-bold text-black">বাজার দর</h3>
 
             <time className="text-sm text-gray-500">
               <TodayDate />
@@ -62,45 +68,60 @@ const Header = () => {
       </div>
 
       {/* Desktop Authentication */}
-      <div className="hidden lg:flex">
-        {isSignIn ? (
-          <div className="flex items-center gap-4">
-            <h4>Welcome, John Doe</h4>
-            <div className="dropdown dropdown-end">
-              {/* Avatar Button */}
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-circle btn-ghost avatar"
-              >
-                <div className="w-10 rounded-full">
-                  <Image
-                    src="https://ik.imagekit.io/muhammadsakib/default-image.jpg?updatedAt=1791385520606"
-                    alt="User avatar"
-                    width={40}
-                    height={40}
-                  />
+      {isPending ? (
+        <div className="hidden lg:flex ">
+          <span className=" loading loading-spinner text-success loading-lg "></span>
+        </div>
+      ) : (
+        <div className="hidden lg:flex">
+          {isSignIn ? (
+            <div className="flex items-center gap-4">
+              <h4>
+                Welcome, {session?.user?.name?.toLocaleUpperCase() || "User"}
+              </h4>
+              <div className="dropdown dropdown-end">
+                {/* Avatar Button */}
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-circle btn-ghost avatar"
+                >
+                  <div className="w-10 rounded-full">
+                    {session?.user?.image ? (
+                      <Image
+                        src={session.user.image}
+                        alt={session.user.name || "User"}
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-600 font-semibold text-white">
+                        {session?.user?.name?.slice(0, 1).toUpperCase() || "U"}
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {/* User Menu */}
+
+                <ul
+                  tabIndex={-1}
+                  className="menu menu-sm dropdown-content z-10 mt-8 w-90 rounded-box bg-base-100 p-2 shadow"
+                >
+                  <UserMenu />
+                </ul>
               </div>
-
-              {/* User Menu */}
-
-              <ul
-                tabIndex={-1}
-                className="menu menu-sm dropdown-content z-10 mt-8 w-90 rounded-box bg-base-100 p-2 shadow"
-              >
-                <UserMenu />
-              </ul>
             </div>
-          </div>
-        ) : (
-          <>
-            <ul className="menu menu-horizontal gap-4">
-              <AuthLinks />
-            </ul>
-          </>
-        )}
-      </div>
+          ) : (
+            <>
+              <ul className="menu menu-horizontal gap-4">
+                <AuthLinks />
+              </ul>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };

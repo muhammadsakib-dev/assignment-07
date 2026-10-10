@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
  
         pathname: '/muhammadsakib/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/**',
+      },
     ],
   },
   turbopack: {

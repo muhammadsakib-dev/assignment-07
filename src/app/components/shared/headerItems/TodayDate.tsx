@@ -20,7 +20,7 @@ const TodayDate = () => {
 
   return (
     <p className="text-sm text-gray-500">
-      {today || "তারিখ লোড হচ্ছে..."}
+      {today || <span className="loading loading-dots loading-md text-center"></span>}
     </p>
   );
 };
