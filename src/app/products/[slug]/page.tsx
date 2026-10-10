@@ -34,11 +34,11 @@ interface Product {
 
 interface ProductPageProps {
   params: Promise<{
-    id: string;
+    slug: string;
   }>;
 }
 
-const API_URL = "https://api.abcz.workers.dev/api/bazardor/products/";
+const API_URL = "https://api.abcz.workers.dev/api/bazardor/products";
 
 const formatNumber = (value: number) =>
   new Intl.NumberFormat("bn-BD", {
@@ -47,17 +47,17 @@ const formatNumber = (value: number) =>
 
 // Product details content
 const ProductContent = async ({ params }: ProductPageProps) => {
-  const { id } = await params;
+  const { slug } = await params;
 
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
   if (!session) {
-    redirect(`/sign-in?callbackUrl=${encodeURIComponent(`/products/${id}`)}`);
+    redirect(`/sign-in?callbackUrl=${encodeURIComponent(`/products/${slug}`)}`);
   }
 
-  const response = await fetch(`${API_URL}/${encodeURIComponent(id)}`, {
+  const response = await fetch(`${API_URL}/${encodeURIComponent(slug)}`, {
     cache: "force-cache",
   });
 

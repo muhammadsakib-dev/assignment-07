@@ -5,7 +5,7 @@ import CategoryNavLinks, {
 
 const API_URLS = [
   "https://api.abcz.workers.dev/api/bazardor/categories",
-  "https://api.abcz.workers.dev/api/bazardor",
+  "https://api.abcz.workers.dev/api/bazardor/categories",
 ];
 
 const Navbar = async () => {
