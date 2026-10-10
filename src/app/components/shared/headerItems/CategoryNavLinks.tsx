@@ -1,7 +1,9 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 
 export interface Category {
   id: string;
@@ -14,7 +16,7 @@ interface CategoryNavLinksProps {
   categories: Category[];
 }
 
-const CategoryNavLinks = ({
+const CategoryNavLinksContent = ({
   categories,
 }: CategoryNavLinksProps) => {
   const pathname = usePathname();
@@ -25,7 +27,8 @@ const CategoryNavLinks = ({
         const href = `/categories/${category.slug}`;
 
         const isActive =
-          pathname === href || pathname.startsWith(`${href}/`);
+          pathname === href ||
+          pathname.startsWith(`${href}/`);
 
         return (
           <Link
@@ -42,6 +45,27 @@ const CategoryNavLinks = ({
         );
       })}
     </div>
+  );
+};
+
+const CategoryNavLinks = ({
+  categories,
+}: CategoryNavLinksProps) => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-row flex-wrap gap-4 lg:gap-8">
+          {categories.map((category) => (
+            <span key={category.id} className="flex items-center gap-1">
+              <span>{category.icon}</span>
+              <span>{category.nameBn}</span>
+            </span>
+          ))}
+        </div>
+      }
+    >
+      <CategoryNavLinksContent categories={categories} />
+    </Suspense>
   );
 };
 

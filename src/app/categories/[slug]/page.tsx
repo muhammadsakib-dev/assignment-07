@@ -18,7 +18,7 @@ interface CategoryPageProps {
 }
 
 const API_URL =
-  "https://api.api-store.workers.dev/api/bazardor";
+  "https://api.abcz.workers.dev/api/bazardor";
 
 // Fetch category and products
 const CategoryContent = async ({ params }: CategoryPageProps) => {

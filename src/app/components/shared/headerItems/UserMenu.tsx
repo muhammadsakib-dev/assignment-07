@@ -1,32 +1,44 @@
+
 "use client";
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
 
 const UserMenu = () => {
   const { data: session } = authClient.useSession();
   const router = useRouter();
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
 
     setIsLoggingOut(true);
+    setLogoutError("");
 
     try {
       const { error } = await authClient.signOut();
 
       if (error) {
-        console.error("Logout failed:", error.message);
+        console.error("Logout failed:", error);
+        setLogoutError(error.message || "Unable to sign out.");
         return;
       }
 
+      // Redirect only after sign-out succeeds.
       router.replace("/");
       router.refresh();
     } catch (error) {
       console.error("Error during logout:", error);
+
+      setLogoutError(
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred."
+      );
     } finally {
       setIsLoggingOut(false);
     }
@@ -55,6 +67,12 @@ const UserMenu = () => {
         >
           {isLoggingOut ? "Logging out..." : "Logout"}
         </button>
+
+        {logoutError && (
+          <p role="alert" className="mt-2 text-sm text-red-500">
+            {logoutError}
+          </p>
+        )}
       </li>
     </>
   );
