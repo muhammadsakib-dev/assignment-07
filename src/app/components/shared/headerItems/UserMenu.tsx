@@ -1,21 +1,42 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
-import { createAuthClient } from "better-auth/react";
-const { useSession } = createAuthClient();
+
 const UserMenu = () => {
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
     try {
-      await authClient.signOut();
+      const { error } = await authClient.signOut();
+
+      if (error) {
+        console.error("Logout failed:", error.message);
+        return;
+      }
+
+      router.replace("/");
+      router.refresh();
     } catch (error) {
       console.error("Error during logout:", error);
+    } finally {
+      setIsLoggingOut(false);
     }
   };
+
   return (
     <>
       <li>
-        <div  className="justify-between text-[1rem]">
-          {session?.user?.name?.toLocaleUpperCase()}
+        <div className="justify-between text-[1rem]">
+          {session?.user?.name?.toUpperCase() ?? "User"}
         </div>
       </li>
 
@@ -26,9 +47,14 @@ const UserMenu = () => {
       </li>
 
       <li>
-        <Link className="text-[1rem] text-red-500" href="/logout" onClick={handleLogout}>
-          Logout
-        </Link>
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="w-full text-left text-[1rem] text-red-500 disabled:opacity-50"
+        >
+          {isLoggingOut ? "Logging out..." : "Logout"}
+        </button>
       </li>
     </>
   );
