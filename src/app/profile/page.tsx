@@ -42,7 +42,7 @@ const ProfilePage = () => {
 
   const user = session.user;
 
-  
+
   const handleUpdateName = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
