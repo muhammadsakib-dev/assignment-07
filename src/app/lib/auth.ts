@@ -1,21 +1,53 @@
+
 import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 
-const client = new MongoClient(process.env.BETTER_AUTH_MONGO_URI as string);
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`Missing environment variable: ${name}`);
+  }
+
+  return value;
+}
+
+const client = new MongoClient(
+  requiredEnv("BETTER_AUTH_MONGO_URI")
+);
+
 const db = client.db("Assignment-07");
 
 export const auth = betterAuth({
+  baseURL: requiredEnv("BETTER_AUTH_URL"),
+
   database: mongodbAdapter(db, {
     client,
   }),
+
   emailAndPassword: {
     enabled: true,
   },
+
   socialProviders: {
     google: {
-      clientId: process.env.BETTER_AUTH_GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.BETTER_AUTH_GOOGLE_CLIENT_SECRET as string,
+      clientId: requiredEnv("BETTER_AUTH_GOOGLE_CLIENT_ID"),
+      clientSecret: requiredEnv("BETTER_AUTH_GOOGLE_CLIENT_SECRET"),
+    },
+
+    github: {
+      clientId: requiredEnv("BETTER_AUTH_GITHUB_CLIENT_ID"),
+      clientSecret: requiredEnv("BETTER_AUTH_GITHUB_CLIENT_SECRET"),
     },
   },
+
+  
+account: {
+  accountLinking: {
+    enabled: true,
+    disableImplicitLinking: true,
+  },
+},
+
 });
