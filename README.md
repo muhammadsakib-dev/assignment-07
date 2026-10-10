@@ -9,6 +9,7 @@ A modern web application built with **Next.js, TypeScript, and React**. The proj
 - **Frontend:** React 19
 - **Authentication:** Better Auth
 - **Database:** MongoDB
+- **Styling:** Tailwind CSS 4, DaisyUI, and HeroUI
 - **Icons:** Gravity UI Icons and Iconify
 
 ## Getting Started
