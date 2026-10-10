@@ -38,7 +38,7 @@ interface ProductPageProps {
   }>;
 }
 
-const API_URL = "https://api.api-store.workers.dev/api/bazardor/products";
+const API_URL = "https://api.abcz.workers.dev/api/bazardor/products/";
 
 const formatNumber = (value: number) =>
   new Intl.NumberFormat("bn-BD", {
