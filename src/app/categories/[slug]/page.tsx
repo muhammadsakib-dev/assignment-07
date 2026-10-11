@@ -3,13 +3,8 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import CategoryProducts from "./CategoryProducts";
 import type { Product } from "@/types/productTypes";
-
-interface Category {
-  id: string;
-  slug: string;
-  nameBn: string;
-  icon: string;
-}
+import ProductLoading from "@/app/components/LoadingPage";
+import type { Category } from "@/types/Category";
 
 interface CategoryPageProps {
   params: Promise<{
@@ -70,21 +65,12 @@ const CategoryContent = async ({ params }: CategoryPageProps) => {
   );
 };
 
-// Loading fallback
-const CategoryLoading = () => (
-  <main className="mx-auto min-h-[50vh] max-w-7xl px-4 py-6 lg:px-8">
-    <div className="rounded-xl border border-gray-200 bg-white p-5">
-      <p className="text-sm text-gray-500">
-        ক্যাটাগরির তথ্য লোড হচ্ছে...
-      </p>
-    </div>
-  </main>
-);
+
 
 // Page component
 const CategoryPage = ({ params }: CategoryPageProps) => {
   return (
-    <Suspense fallback={<CategoryLoading />}>
+    <Suspense fallback={<ProductLoading />}>
       <CategoryContent params={params} />
     </Suspense>
   );

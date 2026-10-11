@@ -1,65 +1,44 @@
 import { auth } from "@/app/lib/auth";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
-
-interface Market {
-  market: string;
-  division: string;
-  min: number;
-  max: number;
-}
-
-interface Product {
-  id: number;
-  slug: string;
-  nameBn: string;
-  category: string;
-  categoryNameBn: string;
-  categoryIcon: string;
-  image: string;
-  unit: string;
-  today: number;
-  yesterday: number;
-  lastWeek: number;
-  lastMonth: number;
-  change: {
-    dir: string;
-    pct: number;
-  };
-  markets: Market[];
-}
-
-interface ProductPageProps {
-  params: Promise<{
-    slug: string;
-  }>;
-}
+import ProductLoading from "@/app/components/LoadingPage";
+import type {
+  ProductDetails,
+  ProductPageProps,
+} from "@/types/productDetailsTypes";
 
 const API_URL = "https://api.abcz.workers.dev/api/bazardor/products";
 
+// Format numbers in Bangla
 const formatNumber = (value: number) =>
   new Intl.NumberFormat("bn-BD", {
     maximumFractionDigits: 2,
   }).format(value);
 
-// Product details content
+// Product details
 const ProductContent = async ({ params }: ProductPageProps) => {
   const { slug } = await params;
 
+  // Check user session
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
   if (!session) {
-    redirect(`/sign-in?callbackUrl=${encodeURIComponent(`/products/${slug}`)}`);
+    redirect(
+      `/sign-in?callbackUrl=${encodeURIComponent(`/products/${slug}`)}`
+    );
   }
 
-  const response = await fetch(`${API_URL}/${encodeURIComponent(slug)}`, {
-    cache: "force-cache",
-  });
+  // Fetch product details
+  const response = await fetch(
+    `${API_URL}/${encodeURIComponent(slug)}`,
+    {
+      cache: "force-cache",
+    }
+  );
 
   if (response.status === 404) {
     notFound();
@@ -69,12 +48,13 @@ const ProductContent = async ({ params }: ProductPageProps) => {
     throw new Error("Failed to fetch product.");
   }
 
-  const product: Product = await response.json();
+  const product: ProductDetails = await response.json();
 
   if (!product) {
     notFound();
   }
 
+  // Calculate market prices
   const markets = product.markets ?? [];
 
   const lowestPrice = markets.length
@@ -89,15 +69,16 @@ const ProductContent = async ({ params }: ProductPageProps) => {
     ? Math.round(
         markets.reduce(
           (total, market) => total + (market.min + market.max) / 2,
-          0,
-        ) / markets.length,
+          0
+        ) / markets.length
       )
     : product.today;
 
   const isUp = product.change.dir === "up";
   const isDown = product.change.dir === "down";
 
-  const unitLabel = product.unit === "kg" ? "কেজি" : product.unit;
+  const unitLabel =
+    product.unit === "kg" ? "কেজি" : product.unit;
 
   return (
     <main className="min-h-screen bg-[#F0F5F0] px-4 py-6">
@@ -157,7 +138,9 @@ const ProductContent = async ({ params }: ProductPageProps) => {
               {formatNumber(product.today)}
             </p>
 
-            <p className="text-xs text-gray-500">টাকা / {unitLabel}</p>
+            <p className="text-xs text-gray-500">
+              টাকা / {unitLabel}
+            </p>
 
             <p
               className={`mt-1 text-xs font-semibold ${
@@ -176,37 +159,54 @@ const ProductContent = async ({ params }: ProductPageProps) => {
 
         {/* Price Summary */}
         <section className="mt-4 rounded-xl border border-gray-200 bg-white/70 p-4 sm:p-5">
-          <h2 className="mb-3 font-semibold text-gray-900">দামের সারসংক্ষেপ</h2>
+          <h2 className="mb-3 font-semibold text-gray-900">
+            দামের সারসংক্ষেপ
+          </h2>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {/* Lowest Price */}
             <div className="rounded-xl border border-gray-200 p-3">
-              <p className="text-sm text-gray-500">সর্বনিম্ন দাম</p>
+              <p className="text-sm text-gray-500">
+                সর্বনিম্ন দাম
+              </p>
 
               <p className="mt-1 text-xl font-bold text-green-600">
                 {formatNumber(lowestPrice)} টাকা
               </p>
 
-              <p className="mt-1 text-xs text-gray-500">বাজারের সর্বনিম্ন দর</p>
+              <p className="mt-1 text-xs text-gray-500">
+                বাজারের সর্বনিম্ন দর
+              </p>
             </div>
 
+            {/* Highest Price */}
             <div className="rounded-xl border border-gray-200 p-3">
-              <p className="text-sm text-gray-500">সর্বোচ্চ দাম</p>
+              <p className="text-sm text-gray-500">
+                সর্বোচ্চ দাম
+              </p>
 
               <p className="mt-1 text-xl font-bold text-red-600">
                 {formatNumber(highestPrice)} টাকা
               </p>
 
-              <p className="mt-1 text-xs text-gray-500">বাজারের সর্বোচ্চ দর</p>
+              <p className="mt-1 text-xs text-gray-500">
+                বাজারের সর্বোচ্চ দর
+              </p>
             </div>
 
+            {/* Average Price */}
             <div className="rounded-xl border border-gray-200 p-3">
-              <p className="text-sm text-gray-500">গড় দাম</p>
+              <p className="text-sm text-gray-500">
+                গড় দাম
+              </p>
 
               <p className="mt-1 text-xl font-bold text-gray-900">
                 {formatNumber(averagePrice)} টাকা
               </p>
 
-              <p className="mt-1 text-xs text-gray-500">বাজারের গড় দর</p>
+              <p className="mt-1 text-xs text-gray-500">
+                বাজারের গড় দর
+              </p>
             </div>
           </div>
 
@@ -220,9 +220,13 @@ const ProductContent = async ({ params }: ProductPageProps) => {
               <table className="w-full min-w-[560px] text-left text-sm">
                 <thead className="bg-[#F0F5F0] text-gray-600">
                   <tr>
-                    <th className="px-3 py-3 font-medium">বাজার</th>
+                    <th className="px-3 py-3 font-medium">
+                      বাজার
+                    </th>
 
-                    <th className="px-3 py-3 font-medium">বিভাগ</th>
+                    <th className="px-3 py-3 font-medium">
+                      বিভাগ
+                    </th>
 
                     <th className="px-3 py-3 text-right font-medium">
                       সর্বনিম্ন
@@ -232,7 +236,9 @@ const ProductContent = async ({ params }: ProductPageProps) => {
                       সর্বোচ্চ
                     </th>
 
-                    <th className="px-3 py-3 text-right font-medium">গড়</th>
+                    <th className="px-3 py-3 text-right font-medium">
+                      গড়
+                    </th>
                   </tr>
                 </thead>
 
@@ -259,7 +265,10 @@ const ProductContent = async ({ params }: ProductPageProps) => {
                       </td>
 
                       <td className="whitespace-nowrap px-3 py-3 text-right font-medium">
-                        {formatNumber((market.min + market.max) / 2)} টাকা
+                        {formatNumber(
+                          (market.min + market.max) / 2
+                        )}{" "}
+                        টাকা
                       </td>
                     </tr>
                   ))}
@@ -278,21 +287,13 @@ const ProductContent = async ({ params }: ProductPageProps) => {
 };
 
 // Loading fallback
-const ProductLoading = () => (
-  <main className="min-h-screen bg-[#F0F5F0] px-4 py-6">
-    <div className="mx-auto max-w-5xl rounded-xl border border-gray-200 bg-white p-5">
-      <p className="text-sm text-gray-500">পণ্যের তথ্য লোড হচ্ছে...</p>
-    </div>
-  </main>
-);
+
 
 // Page component
-const ProductPage = ({ params }: ProductPageProps) => {
-  return (
-    <Suspense fallback={<ProductLoading />}>
-      <ProductContent params={params} />
-    </Suspense>
-  );
-};
+const ProductPage = ({ params }: ProductPageProps) => (
+  <Suspense fallback={<ProductLoading />}>
+    <ProductContent params={params} />
+  </Suspense>
+);
 
 export default ProductPage;
