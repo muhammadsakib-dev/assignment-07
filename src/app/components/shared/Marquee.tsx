@@ -28,7 +28,7 @@ const MarketTicker = async () => {
   const marqueeData = await fetchProducts();
 
   return (
-    <section className="w-full overflow-hidden border-y border-gray-200 bg-white py-2">
+    <section className="sticky top-0 z-50 w-full overflow-hidden border-y border-gray-200 bg-white py-2">
       {/* Marquee */}
       <div className="min-w-0 overflow-hidden">
         <div className="bazardor-track flex w-max">
@@ -62,18 +62,26 @@ const MarketTicker = async () => {
 
               <span
                 className={
-                  product.change.dir === "up"
-                    ? "rounded-full bg-red-50 px-2 py-1 font-semibold text-red-600"
-                    : "rounded-full bg-green-50 px-2 py-1 font-semibold text-green-700"
+                  product.change.pct === 0
+                    ? "rounded-full bg-gray-100 px-2 py-1 font-semibold text-gray-600"
+                    : product.change.dir === "up"
+                      ? "rounded-full bg-red-50 px-2 py-1 font-semibold text-red-600"
+                      : "rounded-full bg-green-50 px-2 py-1 font-semibold text-green-700"
                 }
               >
-                {product.change.dir === "up" ? (
-                  <IoTriangle className="inline rotate-180" />
+                {product.change.pct === 0 ? (
+                  "-0%"
                 ) : (
-                  <IoTriangle className="inline" />
-                )}{" "}
-                {product.change.pct > 0 ? "+" : ""}
-                {product.change.pct}%
+                  <>
+                    {product.change.dir === "up" ? (
+                      <IoTriangle className="inline rotate-180" />
+                    ) : (
+                      <IoTriangle className="inline" />
+                    )}{" "}
+                    {product.change.pct > 0 ? "+" : ""}
+                    {product.change.pct}%
+                  </>
+                )}
               </span>
             </Link>
           ))}
