@@ -1,4 +1,4 @@
-
+// complete UserMenu component: src/app/components/shared/headerItems/UserMenu.tsx
 "use client";
 
 import Link from "next/link";
@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
 
-const UserMenu = () => {
+export default function UserMenu() {
   const { data: session } = authClient.useSession();
   const router = useRouter();
 
@@ -28,7 +28,6 @@ const UserMenu = () => {
         return;
       }
 
-      // Redirect only after sign-out succeeds.
       router.replace("/");
       router.refresh();
     } catch (error) {
@@ -48,7 +47,8 @@ const UserMenu = () => {
     <>
       <li>
         <div className="justify-between text-[1rem]">
-         {session?.user?.name ?? "User"} <span className="font-bold text-sm text-red-500">New</span>
+          {session?.user?.name ?? "User"}
+          <span className="text-sm font-bold text-red-500">New</span>
         </div>
       </li>
 
@@ -76,6 +76,4 @@ const UserMenu = () => {
       </li>
     </>
   );
-};
-
-export default UserMenu;
+}

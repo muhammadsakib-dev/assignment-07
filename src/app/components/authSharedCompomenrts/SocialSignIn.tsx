@@ -1,4 +1,4 @@
-
+// complete SocialSignIn component: src/app/components/authSharedCompomenrts/SocialSignIn.tsx
 "use client";
 
 import { useState } from "react";
@@ -17,7 +17,7 @@ export function Social() {
     setErrorMessage("");
 
     try {
-      // Clear the current application session first.
+  
       const { error: logoutError } = await authClient.signOut();
 
       if (logoutError) {

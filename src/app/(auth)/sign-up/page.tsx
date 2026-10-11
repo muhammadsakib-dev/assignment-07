@@ -1,4 +1,4 @@
-
+// complete SignUp page: src/app/(auth)/sign-up/page.tsx
 "use client";
 
 import { Eye, EyeSlash } from "@gravity-ui/icons";

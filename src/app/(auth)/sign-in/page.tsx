@@ -1,4 +1,4 @@
-
+// complete SignUp page: src/app/(auth)/sign-up/page.tsx
 "use client";
 
 import { Eye, EyeSlash } from "@gravity-ui/icons";
@@ -48,15 +48,11 @@ export default function SignIn() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const callbackUrl = getProductCallbackUrl(
-      params.get("callbackUrl")
-    );
+    const callbackUrl = getProductCallbackUrl(params.get("callbackUrl"));
 
     if (callbackUrl !== "/") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCallbackQuery(
-        `?callbackUrl=${encodeURIComponent(callbackUrl)}`
-      );
+      setCallbackQuery(`?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
   }, []);
 
@@ -73,9 +69,7 @@ export default function SignIn() {
     }
 
     const params = new URLSearchParams(window.location.search);
-    const destination = getProductCallbackUrl(
-      params.get("callbackUrl")
-    );
+    const destination = getProductCallbackUrl(params.get("callbackUrl"));
 
     setIsSubmitting(true);
 
@@ -118,9 +112,7 @@ export default function SignIn() {
         className="mx-auto flex w-full max-w-96 flex-col gap-4"
         onSubmit={onSubmit}
       >
-        <h3 className="text-center text-xl font-semibold">
-          সাইন ইন করুন
-        </h3>
+        <h3 className="text-center text-xl font-semibold">সাইন ইন করুন</h3>
 
         <p className="text-center text-sm text-gray-500">
           আপনার অ্যাকাউন্টে সাইন ইন করে বিস্তারিত দাম দেখুন।
@@ -131,9 +123,7 @@ export default function SignIn() {
           name="email"
           type="email"
           validate={(value) => {
-            if (
-              !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)
-            ) {
+            if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
               return "Please enter a valid email address";
             }
 

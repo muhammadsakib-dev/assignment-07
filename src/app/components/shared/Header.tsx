@@ -3,7 +3,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-
 import { authClient } from "@/app/lib/auth-client";
 import AuthLinks from "./headerItems/AuthLinks";
 import TodayDate from "./headerItems/TodayDate";
@@ -11,7 +10,6 @@ import UserMenu from "./headerItems/UserMenu";
 
 const Header = () => {
   const { data: session, isPending } = authClient.useSession();
-
   const isSignIn = Boolean(session?.user);
 
   return (
@@ -28,9 +26,7 @@ const Header = () => {
           />
 
           <div>
-            <h3 className="text-xl font-bold text-black">
-              বাজার দর
-            </h3>
+            <h3 className="text-xl font-bold text-black">বাজার দর</h3>
 
             <time className="text-sm text-gray-500">
               <TodayDate />
@@ -70,7 +66,7 @@ const Header = () => {
           >
             {isPending ? (
               <li>
-                <span>Loading...</span>
+                <span className="loading loading-dots loading-xl" />
               </li>
             ) : isSignIn ? (
               <UserMenu />
@@ -89,8 +85,7 @@ const Header = () => {
           <div className="flex items-center gap-4">
             <h4>
               Welcome,{" "}
-              {session?.user?.name?.trim().toLocaleUpperCase() ||
-                "USER"}
+              {session?.user?.name?.trim().toLocaleUpperCase() || "USER"}
             </h4>
 
             <div className="dropdown dropdown-end">
@@ -112,10 +107,8 @@ const Header = () => {
                     />
                   ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-600 font-semibold text-white">
-                      {session?.user?.name
-                        ?.trim()
-                        .charAt(0)
-                        .toUpperCase() || "U"}
+                      {session?.user?.name?.trim().charAt(0).toUpperCase() ||
+                        "U"}
                     </div>
                   )}
                 </div>
@@ -124,7 +117,7 @@ const Header = () => {
               {/* User Menu */}
               <ul
                 tabIndex={-1}
-                className="menu menu-sm dropdown-content z-10 mt-8 w-72 rounded-box bg-base-100 p-2 shadow"
+                className="menu menu-sm dropdown-content mt-8 w-72 rounded-box bg-base-100 p-2 shadow z-99"
               >
                 <UserMenu />
               </ul>

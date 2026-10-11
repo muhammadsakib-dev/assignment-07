@@ -1,15 +1,17 @@
+// complete Product Page: products/[slug]/page.tsx
 import { auth } from "@/app/lib/auth";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import ProductLoading from "@/app/components/LoadingPage";
+import { IoTriangle } from "react-icons/io5";
 import type {
   ProductDetails,
   ProductPageProps,
 } from "@/types/productDetailsTypes";
 
-const API_URL = "https://api.abcz.workers.dev/api/bazardor/products";
+const API_URL = "https://openapi.programming-hero.com/api/bazardor/products";
 
 // Format numbers in Bangla
 const formatNumber = (value: number) =>
@@ -19,6 +21,7 @@ const formatNumber = (value: number) =>
 
 // Product details
 const ProductContent = async ({ params }: ProductPageProps) => {
+  // Get product slug from params
   const { slug } = await params;
 
   // Check user session
@@ -27,18 +30,13 @@ const ProductContent = async ({ params }: ProductPageProps) => {
   });
 
   if (!session) {
-    redirect(
-      `/sign-in?callbackUrl=${encodeURIComponent(`/products/${slug}`)}`
-    );
+    redirect(`/sign-in?callbackUrl=${encodeURIComponent(`/products/${slug}`)}`);
   }
 
   // Fetch product details
-  const response = await fetch(
-    `${API_URL}/${encodeURIComponent(slug)}`,
-    {
-      cache: "force-cache",
-    }
-  );
+  const response = await fetch(`${API_URL}/${encodeURIComponent(slug)}`, {
+    cache: "force-cache",
+  });
 
   if (response.status === 404) {
     notFound();
@@ -69,16 +67,33 @@ const ProductContent = async ({ params }: ProductPageProps) => {
     ? Math.round(
         markets.reduce(
           (total, market) => total + (market.min + market.max) / 2,
-          0
-        ) / markets.length
+          0,
+        ) / markets.length,
       )
     : product.today;
 
   const isUp = product.change.dir === "up";
   const isDown = product.change.dir === "down";
 
+  // Calculate price change from yesterday
+  const changePct = Math.abs(product.change.pct);
+
+  const changeAmount = isUp
+    ? (product.today * changePct) / (100 + changePct)
+    : isDown && changePct < 100
+      ? (product.today * changePct) / (100 - changePct)
+      : 0;
+
   const unitLabel =
-    product.unit === "kg" ? "কেজি" : product.unit;
+    product.unit === "kg"
+      ? "কেজি"
+      : product.unit === "litre"
+        ? "লিটার"
+        : product.unit === "dozen"
+          ? "ডজন"
+          : product.unit === "piece"
+            ? "পিস"
+            : product.unit;
 
   return (
     <main className="min-h-screen bg-[#F0F5F0] px-4 py-6">
@@ -116,16 +131,18 @@ const ProductContent = async ({ params }: ProductPageProps) => {
               </h1>
 
               <p className="mt-1 text-sm text-gray-500">
-                প্রতি {unitLabel} · {product.categoryNameBn}
+                প্রতি {unitLabel} · {product.nameBn}
               </p>
 
               <p className="mt-2 text-xs text-gray-600">
                 গতকালের তুলনায়{" "}
-                {isUp
-                  ? "দাম বেড়েছে"
-                  : isDown
-                    ? "দাম কমেছে"
-                    : "দামের পরিবর্তন হয়নি"}
+                {changePct === 0
+                  ? "দামের পরিবর্তন হয়নি"
+                  : isUp
+                    ? `দাম বেড়েছে ${formatNumber(changeAmount)} টাকা`
+                    : isDown
+                      ? `দাম কমেছে ${formatNumber(changeAmount)} টাকা`
+                      : "দামের পরিবর্তন হয়নি"}
                 ।
               </p>
             </div>
@@ -138,12 +155,10 @@ const ProductContent = async ({ params }: ProductPageProps) => {
               {formatNumber(product.today)}
             </p>
 
-            <p className="text-xs text-gray-500">
-              টাকা / {unitLabel}
-            </p>
+            <p className="text-xs text-gray-500">টাকা / {unitLabel}</p>
 
             <p
-              className={`mt-1 text-xs font-semibold ${
+              className={`mt-1 flex items-center justify-center gap-1 text-xs font-semibold ${
                 isUp
                   ? "text-red-600"
                   : isDown
@@ -151,61 +166,59 @@ const ProductContent = async ({ params }: ProductPageProps) => {
                     : "text-gray-500"
               }`}
             >
-              {isUp ? "▲" : isDown ? "▼" : "—"}{" "}
-              {formatNumber(Math.abs(product.change.pct))}%
+              {isUp ? (
+                <IoTriangle className="rotate-180" />
+              ) : isDown ? (
+                <IoTriangle />
+              ) : (
+                "—"
+              )}{" "}
+              {formatNumber(changePct)}%
             </p>
           </div>
         </section>
 
         {/* Price Summary */}
         <section className="mt-4 rounded-xl border border-gray-200 bg-white/70 p-4 sm:p-5">
-          <h2 className="mb-3 font-semibold text-gray-900">
-            দামের সারসংক্ষেপ
-          </h2>
+          <h2 className="mb-3 font-semibold text-gray-900">দামের সারসংক্ষেপ</h2>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {/* Lowest Price */}
             <div className="rounded-xl border border-gray-200 p-3">
-              <p className="text-sm text-gray-500">
-                সর্বনিম্ন দাম
-              </p>
+              <p className="text-sm text-gray-500">সর্বনিম্ন দাম</p>
 
               <p className="mt-1 text-xl font-bold text-green-600">
                 {formatNumber(lowestPrice)} টাকা
               </p>
 
               <p className="mt-1 text-xs text-gray-500">
-                বাজারের সর্বনিম্ন দর
+                সবচেয়ে কম দামের বাজার
               </p>
             </div>
 
             {/* Highest Price */}
             <div className="rounded-xl border border-gray-200 p-3">
-              <p className="text-sm text-gray-500">
-                সর্বোচ্চ দাম
-              </p>
+              <p className="text-sm text-gray-500">সর্বোচ্চ দাম</p>
 
               <p className="mt-1 text-xl font-bold text-red-600">
                 {formatNumber(highestPrice)} টাকা
               </p>
 
               <p className="mt-1 text-xs text-gray-500">
-                বাজারের সর্বোচ্চ দর
+                সবচেয়ে বেশি দামের বাজার
               </p>
             </div>
 
             {/* Average Price */}
             <div className="rounded-xl border border-gray-200 p-3">
-              <p className="text-sm text-gray-500">
-                গড় দাম
-              </p>
+              <p className="text-sm text-gray-500">গড় দাম</p>
 
               <p className="mt-1 text-xl font-bold text-gray-900">
                 {formatNumber(averagePrice)} টাকা
               </p>
 
               <p className="mt-1 text-xs text-gray-500">
-                বাজারের গড় দর
+                প্রতি {unitLabel}-এর হিসাবে
               </p>
             </div>
           </div>
@@ -217,28 +230,18 @@ const ProductContent = async ({ params }: ProductPageProps) => {
 
           {markets.length > 0 ? (
             <div className="overflow-x-auto rounded-xl border border-gray-200">
-              <table className="w-full min-w-[560px] text-left text-sm">
-                <thead className="bg-[#F0F5F0] text-gray-600">
+              <table className="w-full min-w-140 text-left text-sm">
+                <thead className="bg-gray-200 text-black">
                   <tr>
-                    <th className="px-3 py-3 font-medium">
-                      বাজার
-                    </th>
-
-                    <th className="px-3 py-3 font-medium">
-                      বিভাগ
-                    </th>
-
+                    <th className="px-3 py-3 font-medium">বাজার</th>
+                    <th className="px-3 py-3 font-medium">বিভাগ</th>
                     <th className="px-3 py-3 text-right font-medium">
                       সর্বনিম্ন
                     </th>
-
                     <th className="px-3 py-3 text-right font-medium">
                       সর্বোচ্চ
                     </th>
-
-                    <th className="px-3 py-3 text-right font-medium">
-                      গড়
-                    </th>
+                    <th className="px-3 py-3 text-right font-medium">গড়</th>
                   </tr>
                 </thead>
 
@@ -246,7 +249,7 @@ const ProductContent = async ({ params }: ProductPageProps) => {
                   {markets.map((market, index) => (
                     <tr
                       key={`${market.market}-${market.division}-${index}`}
-                      className="hover:bg-[#F0F5F0]/60"
+                      className="hover:bg-gray-100"
                     >
                       <td className="whitespace-nowrap px-3 py-3">
                         {market.market}
@@ -265,10 +268,7 @@ const ProductContent = async ({ params }: ProductPageProps) => {
                       </td>
 
                       <td className="whitespace-nowrap px-3 py-3 text-right font-medium">
-                        {formatNumber(
-                          (market.min + market.max) / 2
-                        )}{" "}
-                        টাকা
+                        {formatNumber((market.min + market.max) / 2)} টাকা
                       </td>
                     </tr>
                   ))}
@@ -285,9 +285,6 @@ const ProductContent = async ({ params }: ProductPageProps) => {
     </main>
   );
 };
-
-// Loading fallback
-
 
 // Page component
 const ProductPage = ({ params }: ProductPageProps) => (
