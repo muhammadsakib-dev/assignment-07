@@ -42,7 +42,6 @@ export default function SignIn() {
 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [callbackQuery, setCallbackQuery] = useState("");
@@ -84,7 +83,6 @@ export default function SignIn() {
       const { error } = await authClient.signIn.email({
         email,
         password,
-        rememberMe,
         callbackURL: destination,
       });
 
@@ -177,16 +175,6 @@ export default function SignIn() {
 
           <FieldError />
         </TextField>
-
-        <div className="flex items-center gap-2">
-          <Input
-            type="checkbox"
-            id="rememberMe"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-          />
-          <Label htmlFor="rememberMe">Remember me</Label>
-        </div>
 
         {message && (
           <p className="text-sm text-red-600" role="alert">

@@ -48,7 +48,7 @@ const UserMenu = () => {
     <>
       <li>
         <div className="justify-between text-[1rem]">
-          {session?.user?.name?.toUpperCase() ?? "User"}
+         {session?.user?.name ?? "User"} <span className="font-bold text-sm text-red-500">New</span>
         </div>
       </li>
 
