@@ -1,79 +1,69 @@
-
+// complete Categories -- Page.tsx
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
 import CategoryProducts from "./CategoryProducts";
-import type { Product } from "@/types/productTypes";
 import ProductLoading from "@/app/components/LoadingPage";
-import type { Category } from "@/types/Category";
-
+import type { Product } from "@/types/productTypes";
+import NotFound from "@/app/not-found";
 interface CategoryPageProps {
   params: Promise<{
     slug: string;
   }>;
 }
 
-const API_URL =
-  "https://api.abcz.workers.dev/api/bazardor";
+type CategoryProduct = Product & {
+  categoryNameBn: string;
+  categoryIcon: string;
+};
 
-// Fetch category and products
-const CategoryContent = async ({ params }: CategoryPageProps) => {
+async function CategoryContent({ params }: CategoryPageProps) {
+
   const { slug } = await params;
 
-  const [categoryResponse, productsResponse] = await Promise.all([
-    fetch(
-      `${API_URL}/categories/${encodeURIComponent(slug)}`,
-      {
-        cache: "force-cache",
-      }
-    ),
+  // Fetch products based on the category slug
+  const response = await fetch(
+    `https://openapi.programming-hero.com/api/bazardor/products?category=${slug}`,
+    { cache: "force-cache" }
+  );
 
-    fetch(
-      `${API_URL}/products?category=${encodeURIComponent(slug)}`,
-      {
-        cache: "force-cache",
-      }
-    ),
-  ]);
-
-  if (categoryResponse.status === 404) {
-    notFound();
+  if (!response.ok) {
+    return (
+      <NotFound
+        title="কোথাও সমস্যা হয়েছে"
+        description="ইঞ্জিনিয়ারকে বলুন 'category-page.tsx' এই ফাইল চেক করতে"
+      />
+    );
   }
 
-  if (!categoryResponse.ok || !productsResponse.ok) {
-    throw new Error("Failed to fetch category data.");
-  }
+  const products: CategoryProduct[] = await response.json();
+  const category = products[0];
 
-  const category: Category = await categoryResponse.json();
-  const products: Product[] = await productsResponse.json();
+  if (!category) {
+    return <NotFound title="কোথাও সমস্যা হয়েছে" description="ইঞ্জিনিয়ারকে বলুন 'category-page.tsx' এই ফাইল চেক করতে" />;
+  }
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
-      <header className="mb-5 rounded-xl border border-gray-200 p-5">
+      <header className="mb-5 rounded-xl border border-gray-200 bg-white p-5">
         <h1 className="text-xl font-bold text-gray-900">
-          {category.icon} {category.nameBn}
+          {category.categoryIcon} {category.categoryNameBn}
         </h1>
 
         <p className="mt-1 text-sm text-gray-500">
-          মোট{" "}
-          {new Intl.NumberFormat("bn-BD").format(products.length)}
-          টি পণ্য
+           {new Intl.NumberFormat("bn-BD").format(products.length)} টি পণ্যের আজকের দাম ও পরিবর্তন
         </p>
       </header>
 
       <CategoryProducts products={products} />
     </main>
   );
-};
+}
 
 
-
-// Page component
-const CategoryPage = ({ params }: CategoryPageProps) => {
+// Main Category Page Component + Use Suspense for loading state
+export default function CategoryPage({ params }: CategoryPageProps) {
   return (
     <Suspense fallback={<ProductLoading />}>
       <CategoryContent params={params} />
     </Suspense>
   );
-};
-
-export default CategoryPage;
+}

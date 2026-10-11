@@ -1,44 +1,40 @@
-
+// complete CategoryProducts.tsx
 "use client";
-import type { Product } from "@/types/productTypes";
+
 import { useState } from "react";
+import type { Product } from "@/types/productTypes";
 import ProductCard from "@/app/components/shared/ProductCard";
 
 interface CategoryProductsProps {
   products: Product[];
 }
 
-type SortOption = "default" | "price-low" | "price-high" | "change";
+type SortOption = "default" | "price-low" | "price-high";
 
+// To Bangla Number Format
 const formatNumber = (value: number) =>
   new Intl.NumberFormat("bn-BD", {
     maximumFractionDigits: 2,
   }).format(value);
 
-const CategoryProducts = ({
+
+export default function CategoryProducts({
   products,
-}: CategoryProductsProps) => {
+}: CategoryProductsProps) {
+
+  // Sort state + Function Management
   const [sort, setSort] = useState<SortOption>("default");
 
   const sortedProducts = [...products].sort((a, b) => {
-    switch (sort) {
-      case "price-low":
-        return a.today - b.today;
-
-      case "price-high":
-        return b.today - a.today;
-
-      case "change":
-        return Math.abs(b.change.pct) - Math.abs(a.change.pct);
-
-      default:
-        return 0;
-    }
+    if (sort === "price-low") return a.today - b.today;
+    if (sort === "price-high") return b.today - a.today;
+    return 0;
   });
 
   return (
     <>
-      <div className="mt-5 flex items-center justify-end gap-2 rounded-xl border border-gray-200 bg-white/70 p-3">
+      <div className="mt-5 flex items-center justify-end gap-2 rounded-xl border border-gray-200 bg-white p-3">
+
         <label htmlFor="sort" className="text-sm text-gray-600">
           সাজান
         </label>
@@ -54,7 +50,6 @@ const CategoryProducts = ({
           <option value="default">ডিফল্ট</option>
           <option value="price-low">দাম: কম থেকে বেশি</option>
           <option value="price-high">দাম: বেশি থেকে কম</option>
-          <option value="change">পরিবর্তন: বেশি আগে</option>
         </select>
       </div>
 
@@ -65,10 +60,7 @@ const CategoryProducts = ({
       {sortedProducts.length > 0 ? (
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {sortedProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
@@ -78,6 +70,4 @@ const CategoryProducts = ({
       )}
     </>
   );
-};
-
-export default CategoryProducts;
+}
