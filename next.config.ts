@@ -31,5 +31,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
-// https://ik.imagekit.io/muhammadsakib/cart.png?updatedAt=1791385677073

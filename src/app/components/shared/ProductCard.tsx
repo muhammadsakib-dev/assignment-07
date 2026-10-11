@@ -1,79 +1,87 @@
-
+// Complete Component: ProductCard.tsx
 import Link from "next/link";
-
-export interface Product {
-  id: number;
-  nameBn: string;
-  image: string;
-  unit: string;
-  today: number;
-  change: {
-    dir: string;
-    pct: number;
-  };
-}
-
-interface ProductCardProps {
-  product: Product;
-}
-
-const formatNumber = (value: number) =>
+import type { ProductCardProps } from "@/types/productTypes";
+import NotFound from "@/app/not-found";
+import { IoTriangle } from "react-icons/io5";
+// Format number in Bangla locale
+export const formatNumber = (value: number) =>
   new Intl.NumberFormat("bn-BD", {
     maximumFractionDigits: 2,
   }).format(value);
 
 const ProductCard = ({ product }: ProductCardProps) => {
+  // Check if product is undefined or null
   if (!product) {
-    throw new Error(
-      "ProductCard requires a product prop. Check how ProductCard is used."
+    return (
+      <NotFound
+        title="কোথাও সমস্যা হয়েছে"
+        description="ইঞ্জিনিয়ারকে বলুন 'ProductCard ও 'Product' এই দুটি ফাইল চেক করতে"
+      />
     );
   }
 
   const isUp = product.change?.dir === "up";
   const isDown = product.change?.dir === "down";
+
+  // it's my extra code, I added this to avoid error when product.change is undefined
   const changePercentage = product.change?.pct ?? 0;
 
   return (
     <Link
       href={`/products/${product.id}`}
-      className="block rounded-xl bg-white p-5"
+      className="rounded-xl bg-white px-6 py-3 shadow-md transition hover:shadow-2xl"
     >
       <div className="flex items-center gap-4">
-        <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-[#F0F5F0] text-3xl">
+        {/* Product Image */}
+        <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-3xl">
           {product.image}
         </div>
 
+        {/* Product Name & Unit */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">
-            {product.nameBn}
-          </h3>
+          <h3 className="font-semibold">{product.nameBn}</h3>
 
           <p className="text-sm text-gray-600">
             {product.unit === "kg"
               ? "প্রতি কেজি"
-              : product.unit}
+              : product.unit === "litre"
+                ? "প্রতি লিটার"
+                : product.unit === "dozen"
+                  ? "প্রতি ডজন"
+                  : product.unit === "piece"
+                    ? "প্রতি পিস"
+                    : product.unit}
           </p>
         </div>
       </div>
 
-      <div className="mt-4">
+      {/* Today's Price */}
+      <div className="mt-3">
         <p className="text-sm text-gray-600">আজকের দাম</p>
 
         <div className="mt-1 flex items-center justify-between gap-3">
-          <p className="text-xl font-semibold text-gray-900">
+          <p className="text-lg font-semibold text-gray-900">
             {formatNumber(product.today)} টাকা
           </p>
 
+          {/* Price Change */}
           <span
-            className={`shrink-0 rounded-full px-3 py-2 text-sm font-semibold ${
+            className={`flex items-center gap-1 shrink-0 rounded-full bg-gray-100 px-3 py-2 text-sm font-semibold ${
               isUp
-                ? "bg-[#F0F5F0] text-red-600"
+                ? "text-red-600"
                 : isDown
-                  ? "bg-[#F0F5F0] text-green-600"
-                  : "bg-[#F0F5F0] text-gray-600"
+                  ? "text-green-600"
+                  : "text-gray-600"
             }`}
           >
-            {isUp ? "▲" : isDown ? "▼" : "—"}{" "}
+            {/* Change Indicator */}
+            {isUp ? (
+              <IoTriangle />
+            ) : isDown ? (
+              <IoTriangle className="rotate-180" />
+            ) : (
+              "—"
+            )}{" "}
             {formatNumber(Math.abs(changePercentage))}%
           </span>
         </div>

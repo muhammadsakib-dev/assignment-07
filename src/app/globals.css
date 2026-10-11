@@ -1,3 +1,4 @@
+/* Complete CSS: globals.css */
 @import "tailwindcss";
 @import "@heroui/styles";
 @plugin "daisyui" ;
@@ -25,4 +26,29 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+/* Market ticker animation */
+@keyframes bazardor-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.bazardor-track {
+  animation: bazardor-marquee 60s linear infinite;
+}
+
+.bazardor-track:hover,
+.bazardor-track:focus-within {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bazardor-track {
+    animation: none;
+  }
 }

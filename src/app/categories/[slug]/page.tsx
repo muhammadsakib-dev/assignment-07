@@ -2,7 +2,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import CategoryProducts from "./CategoryProducts";
-import type { Product } from "@/app/components/shared/ProductCard";
+import type { Product } from "@/types/productTypes";
 
 interface Category {
   id: string;

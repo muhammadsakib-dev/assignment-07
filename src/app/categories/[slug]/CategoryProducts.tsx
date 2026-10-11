@@ -1,10 +1,8 @@
 
 "use client";
-
+import type { Product } from "@/types/productTypes";
 import { useState } from "react";
-import ProductCard, {
-  type Product,
-} from "@/app/components/shared/ProductCard";
+import ProductCard from "@/app/components/shared/ProductCard";
 
 interface CategoryProductsProps {
   products: Product[];
